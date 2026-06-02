@@ -139,6 +139,27 @@ Call these helpers from your test runner’s browser context (e.g. `page.evaluat
 
 ## Running tests
 
+### Playwright
+
+```bash
+npm install -D @playwright/test
+npx playwright install
+```
+
+In `playwright.config.ts`:
+
+```ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  use: { baseURL: 'http://localhost:3000' },
+});
+```
+
+Start the site (`npm start`), then run `npx playwright test`. Put specs in the folder you set as `testDir` (for example `tests/playwright/`).
+
+For API-only checks against the mock backend, use Playwright’s `request` fixture with the same `baseURL` and an `X-Session-Id` header on session-scoped routes.
+
 ### Cypress
 
 ```bash
