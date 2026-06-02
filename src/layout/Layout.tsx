@@ -20,7 +20,7 @@ export const Layout = () => {
       type="button"
       className="icon-btn"
       aria-pressed={state.lang === lang}
-      onClick={() => setLang(lang)}
+      onClick={() => void setLang(lang)}
       data-testid={testid}
       style={state.lang === lang ? { fontWeight: 700 } : undefined}
     >

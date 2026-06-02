@@ -37,9 +37,14 @@ export const HamburgerMenu = ({ open, onClose }: Props) => {
             {tt('nav.cart')}
           </NavLink>
           {isLoggedIn ? (
-            <NavLink to="/ecommerce/login" className={linkClass} data-testid="nav-account">
-              {tt('nav.account')}
-            </NavLink>
+            <>
+              <NavLink to="/ecommerce/orders" className={linkClass} data-testid="nav-orders">
+                {tt('nav.orders')}
+              </NavLink>
+              <NavLink to="/ecommerce/login" className={linkClass} data-testid="nav-account">
+                {tt('nav.account')}
+              </NavLink>
+            </>
           ) : (
             <NavLink to="/ecommerce/login" className={linkClass} data-testid="nav-login">
               {tt('nav.login')}

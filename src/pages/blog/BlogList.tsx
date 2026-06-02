@@ -1,17 +1,23 @@
 import { Link } from 'react-router-dom';
-import { useApp } from '../../context/AppContext';
-import { POSTS } from '../../data/posts';
+import { usePosts } from '../../hooks/usePosts';
 import { useT } from '../../i18n/useT';
 
 export const BlogList = () => {
-  const { state } = useApp();
+  const { posts, loading, error } = usePosts();
   const tt = useT();
-  const posts = state.dataMode === 'empty' ? [] : POSTS;
 
   return (
     <section data-testid="page-blog">
       <h1>{tt('blog.title')}</h1>
-      {posts.length === 0 ? (
+      {loading ? (
+        <p className="muted" data-testid="blog-loading">
+          {tt('blog.loading')}
+        </p>
+      ) : error ? (
+        <p style={{ color: 'crimson' }} data-testid="blog-error">
+          {error}
+        </p>
+      ) : posts.length === 0 ? (
         <p data-testid="blog-empty">{tt('blog.empty')}</p>
       ) : (
         <div className="posts-list">

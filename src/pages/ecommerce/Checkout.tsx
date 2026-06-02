@@ -1,21 +1,24 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ApiError, apiPlaceOrder } from '../../api/client';
 import { useApp } from '../../context/AppContext';
-import { PRODUCTS } from '../../data/products';
+import { useProducts } from '../../hooks/useProducts';
 import { useT } from '../../i18n/useT';
 import { formatPrice } from '../../i18n/currency';
 
 export const Checkout = () => {
   const { state, clearCart } = useApp();
+  const { products } = useProducts();
   const tt = useT();
   const [address, setAddress] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [cardName, setCardName] = useState('');
   const [placed, setPlaced] = useState<string | null>(null);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   const rows = state.cart
     .map((i) => {
-      const p = PRODUCTS.find((x) => x.id === i.productId);
+      const p = products.find((x) => x.id === i.productId);
       return p ? { ...p, qty: i.qty, total: p.price * i.qty } : null;
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
@@ -23,11 +26,16 @@ export const Checkout = () => {
   const total = rows.reduce((acc, r) => acc + r.total, 0);
   const isLoggedIn = state.auth !== 'anon';
 
-  const placeOrder = (e: React.FormEvent) => {
+  const placeOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    const orderId = `ORD-${Date.now().toString().slice(-6)}`;
-    setPlaced(orderId);
-    clearCart();
+    setOrderError(null);
+    try {
+      const { orderId } = await apiPlaceOrder({ address, cardName, cardNumber });
+      await clearCart();
+      setPlaced(orderId);
+    } catch (err) {
+      setOrderError(err instanceof ApiError ? err.message : 'Could not place order');
+    }
   };
 
   if (placed) {
@@ -37,6 +45,9 @@ export const Checkout = () => {
         <p data-testid="order-id">
           {tt('checkout.success.orderId')} {placed}
         </p>
+        <Link to="/ecommerce/orders" className="btn secondary" data-testid="checkout-view-orders" style={{ marginTop: 12, display: 'inline-block' }}>
+          {tt('orders.viewOrders')}
+        </Link>
       </section>
     );
   }
@@ -121,6 +132,11 @@ export const Checkout = () => {
           required
           data-testid="checkout-card-number"
         />
+        {orderError && (
+          <p style={{ color: 'crimson' }} data-testid="checkout-error">
+            {orderError}
+          </p>
+        )}
         <button type="submit" className="btn" data-testid="checkout-place-order">
           {tt('checkout.placeOrder')}
         </button>

@@ -4,7 +4,8 @@ import { registerAllModules } from 'handsontable/registry';
 import 'handsontable/styles/handsontable.css';
 import 'handsontable/styles/ht-theme-main.css';
 import * as XLSX from 'xlsx';
-import { TABLE_ROWS, type TableRow } from '../../data/tableRows';
+import type { TableRow } from '../../data/tableRows';
+import { ApiError, apiBulkTableRows, apiClearTableRows, apiGetTableRows } from '../../api/client';
 import { useApp } from '../../context/AppContext';
 import { useT } from '../../i18n/useT';
 
@@ -49,29 +50,50 @@ export const HandsOnTablePage = () => {
   const { state } = useApp();
   const tt = useT();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [rows, setRows] = useState<TableRow[]>(state.dataMode === 'empty' ? [] : TABLE_ROWS);
+  const [rows, setRows] = useState<TableRow[]>([]);
   const [filter, setFilter] = useState('');
+  const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
 
   useEffect(() => {
-    setRows(state.dataMode === 'empty' ? [] : TABLE_ROWS);
-  }, [state.dataMode]);
+    if (state.dataMode === 'empty') {
+      setRows([]);
+      setLoading(false);
+      return;
+    }
 
-  const data = useMemo(() => {
-    const filtered = filter
-      ? rows.filter(
-          (r) =>
-            r.name.toLowerCase().includes(filter.toLowerCase()) ||
-            r.email.toLowerCase().includes(filter.toLowerCase()) ||
-            r.country.toLowerCase().includes(filter.toLowerCase()),
-        )
-      : rows;
-    return toMatrix(filtered);
-  }, [rows, filter]);
+    let cancelled = false;
+    setLoading(true);
 
-  const handleClear = () => {
-    setRows([]);
-    setFeedback({ kind: 'ok', text: tt('hot.cleared') });
+    apiGetTableRows(filter || undefined)
+      .then((res) => {
+        if (!cancelled) setRows(res.rows);
+      })
+      .catch(() => {
+        if (!cancelled) setRows([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.dataMode, filter]);
+
+  const data = useMemo(() => toMatrix(rows), [rows]);
+
+  const handleClear = async () => {
+    try {
+      const res = await apiClearTableRows();
+      setRows(res.rows);
+      setFeedback({ kind: 'ok', text: tt('hot.cleared') });
+    } catch (err) {
+      setFeedback({
+        kind: 'err',
+        text: err instanceof ApiError ? err.message : tt('hot.parseError', { message: 'clear failed' }),
+      });
+    }
   };
 
   const handleUploadClick = () => fileInputRef.current?.click();
@@ -86,12 +108,14 @@ export const HandsOnTablePage = () => {
       if (!sheetName) throw new Error('Empty workbook');
       const sheet = workbook.Sheets[sheetName];
       const parsed = XLSX.utils.sheet_to_json<RawRow>(sheet, { defval: '' });
-      const nextId = (rows.reduce((m, r) => Math.max(m, r.id), 0) || 0) + 1;
+      const allRows = await apiGetTableRows();
+      const nextId = (allRows.rows.reduce((m, r) => Math.max(m, r.id), 0) || 0) + 1;
       const newRows = parseRows(parsed, nextId);
       if (newRows.length === 0) {
         setFeedback({ kind: 'err', text: tt('hot.noRows') });
       } else {
-        setRows([...rows, ...newRows]);
+        const res = await apiBulkTableRows(newRows);
+        setRows(res.rows);
         setFeedback({ kind: 'ok', text: tt('hot.loaded', { count: newRows.length, name: file.name }) });
       }
     } catch (err) {
@@ -126,11 +150,11 @@ export const HandsOnTablePage = () => {
           data-testid="hot-file-input"
           style={{ display: 'none' }}
         />
-        <button className="btn secondary" onClick={handleClear} data-testid="hot-clear-btn">
+        <button className="btn secondary" onClick={() => void handleClear()} data-testid="hot-clear-btn">
           {tt('hot.clear')}
         </button>
         <span className="tag" data-testid="hot-row-count">
-          {tt('hot.rows', { count: data.length })}
+          {loading ? '…' : tt('hot.rows', { count: data.length })}
         </span>
       </div>
 
@@ -149,28 +173,30 @@ export const HandsOnTablePage = () => {
       )}
 
       <div className="hot-host" data-testid="hot-container">
-        <HotTable
-          themeName="ht-theme-main"
-          data={data}
-          colHeaders={HEADERS}
-          rowHeaders={true}
-          columnSorting={true}
-          contextMenu={true}
-          manualColumnResize={true}
-          manualRowResize={true}
-          stretchH="all"
-          height={400}
-          licenseKey="non-commercial-and-evaluation"
-          columns={[
-            { type: 'numeric', readOnly: true },
-            { type: 'text' },
-            { type: 'text' },
-            { type: 'numeric', validator: (value, cb) => cb(typeof value === 'number' && value >= 0 && value <= 120) },
-            { type: 'text' },
-            { type: 'checkbox' },
-            { type: 'numeric', numericFormat: { pattern: '$0,0' } },
-          ]}
-        />
+        {!loading && (
+          <HotTable
+            themeName="ht-theme-main"
+            data={data}
+            colHeaders={HEADERS}
+            rowHeaders={true}
+            columnSorting={true}
+            contextMenu={true}
+            manualColumnResize={true}
+            manualRowResize={true}
+            stretchH="all"
+            height={400}
+            licenseKey="non-commercial-and-evaluation"
+            columns={[
+              { type: 'numeric', readOnly: true },
+              { type: 'text' },
+              { type: 'text' },
+              { type: 'numeric', validator: (value, cb) => cb(typeof value === 'number' && value >= 0 && value <= 120) },
+              { type: 'text' },
+              { type: 'checkbox' },
+              { type: 'numeric', numericFormat: { pattern: '$0,0' } },
+            ]}
+          />
+        )}
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ApiError, apiGetFiles, apiUploadFile, type ApiFileRecord } from '../../api/client';
 import { useT } from '../../i18n/useT';
 import { PlaygroundNav } from './PlaygroundNav';
 
@@ -6,14 +7,6 @@ const MAX_BYTES = 2 * 1024 * 1024;
 const ALLOWED_EXT = ['.txt', '.json', '.pdf'];
 
 type Feedback = { kind: 'ok' | 'err'; text: string } | null;
-
-type UploadedItem = {
-  name: string;
-  size: number;
-  type: string;
-  lastModified: number;
-  preview: string | null;
-};
 
 const getExtension = (name: string) => {
   const dot = name.lastIndexOf('.');
@@ -33,9 +26,15 @@ export const Files = () => {
   const tt = useT();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [uploaded, setUploaded] = useState<UploadedItem[]>([]);
+  const [uploaded, setUploaded] = useState<ApiFileRecord[]>([]);
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [dragOver, setDragOver] = useState(false);
+
+  useEffect(() => {
+    apiGetFiles()
+      .then((res) => setUploaded(res.files))
+      .catch(() => setUploaded([]));
+  }, []);
 
   const validateFile = (file: File): void => {
     if (file.size === 0) throw new Error(tt('files.error.empty'));
@@ -66,21 +65,22 @@ export const Files = () => {
     try {
       validateFile(pendingFile);
       const preview = await readPreview(pendingFile);
-      setUploaded((prev) => [
-        ...prev,
-        {
-          name: pendingFile.name,
-          size: pendingFile.size,
-          type: pendingFile.type || 'application/octet-stream',
-          lastModified: pendingFile.lastModified,
-          preview,
-        },
-      ]);
+      const { file } = await apiUploadFile({
+        name: pendingFile.name,
+        size: pendingFile.size,
+        type: pendingFile.type || 'application/octet-stream',
+        lastModified: pendingFile.lastModified,
+        preview,
+      });
+      setUploaded((prev) => [...prev, file]);
       setFeedback({ kind: 'ok', text: tt('files.uploadSuccess') });
       setPendingFile(null);
       resetFileInput();
     } catch (err) {
-      setFeedback({ kind: 'err', text: (err as Error).message });
+      setFeedback({
+        kind: 'err',
+        text: err instanceof ApiError ? err.message : (err as Error).message,
+      });
     }
   };
 
@@ -150,7 +150,7 @@ export const Files = () => {
               </span>
             </p>
             <div className="flex-row" style={{ flexWrap: 'wrap', gap: 8 }}>
-              <button type="button" className="btn" onClick={handleUploadSubmit} data-testid="files-submit-btn">
+              <button type="button" className="btn" onClick={() => void handleUploadSubmit()} data-testid="files-submit-btn">
                 {tt('files.uploadBtn')}
               </button>
               <button
@@ -208,7 +208,7 @@ export const Files = () => {
       {uploaded.length > 0 && (
         <ul data-testid="files-upload-list" style={{ marginTop: 16, paddingLeft: 20, listStyle: 'disc' }}>
           {uploaded.map((item, i) => (
-            <li key={`${item.name}-${item.lastModified}-${i}`} data-testid={`files-upload-item-${i}`}>
+            <li key={item.id} data-testid={`files-upload-item-${i}`}>
               <strong>{item.name}</strong> — {formatSize(item.size)} — {item.type} — {formatDate(item.lastModified)}
               {item.preview !== null && (
                 <pre

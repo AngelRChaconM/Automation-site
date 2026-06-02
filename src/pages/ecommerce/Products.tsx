@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { CATEGORIES, PRODUCTS } from '../../data/products';
+import { CATEGORIES } from '../../data/products';
+import type { Product } from '../../data/products';
+import { ApiError, apiGetProducts } from '../../api/client';
 import { useT } from '../../i18n/useT';
 import { formatPrice } from '../../i18n/currency';
 
@@ -11,38 +13,89 @@ export const Products = () => {
   const [query, setQuery] = useState('');
   const [brand, setBrand] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [facetProducts, setFacetProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const list = state.dataMode === 'empty' ? [] : PRODUCTS;
+  useEffect(() => {
+    if (state.dataMode === 'empty') {
+      setProducts([]);
+      setFacetProducts([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
-  /** Products matching search + category (used for brand counts and final list). */
-  const catalogForFacets = useMemo(() => {
-    return list.filter((p) => {
-      if (query && !p.name.toLowerCase().includes(query.toLowerCase())) return false;
-      if (category && p.category !== category) return false;
-      return true;
-    });
-  }, [list, query, category]);
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
 
-  const brandsForSidebar = useMemo(() => {
+    const filters = {
+      search: query || undefined,
+      category: category ?? undefined,
+      brand: brand ?? undefined,
+    };
+
+    apiGetProducts(filters)
+      .then((res) => {
+        if (!cancelled) setProducts(res.products);
+      })
+      .catch((err: Error) => {
+        if (!cancelled) {
+          setProducts([]);
+          setError(err instanceof ApiError ? err.message : err.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.dataMode, query, category, brand]);
+
+  useEffect(() => {
+    if (state.dataMode === 'empty') {
+      setFacetProducts([]);
+      return;
+    }
+
+    let cancelled = false;
+    apiGetProducts({
+      search: query || undefined,
+      category: category ?? undefined,
+    })
+      .then((res) => {
+        if (!cancelled) setFacetProducts(res.products);
+      })
+      .catch(() => {
+        if (!cancelled) setFacetProducts([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.dataMode, query, category]);
+
+  useEffect(() => {
+    if (brand && !facetProducts.some((p) => p.brand === brand)) {
+      setBrand(null);
+    }
+  }, [facetProducts, brand]);
+
+  const brandsForSidebar = (() => {
     const counts = new Map<string, number>();
-    for (const p of catalogForFacets) {
+    for (const p of facetProducts) {
       counts.set(p.brand, (counts.get(p.brand) ?? 0) + 1);
     }
     return Array.from(counts.entries())
       .map(([brandName, count]) => ({ brand: brandName, count }))
       .sort((a, b) => a.brand.localeCompare(b.brand));
-  }, [catalogForFacets]);
+  })();
 
-  const filtered = useMemo(() => {
-    if (!brand) return catalogForFacets;
-    return catalogForFacets.filter((p) => p.brand === brand);
-  }, [catalogForFacets, brand]);
-
-  useEffect(() => {
-    if (brand && !catalogForFacets.some((p) => p.brand === brand)) {
-      setBrand(null);
-    }
-  }, [catalogForFacets, brand]);
+  const showEmpty = state.dataMode === 'empty' || (!loading && !error && products.length === 0);
 
   return (
     <section data-testid="page-products">
@@ -93,11 +146,21 @@ export const Products = () => {
               style={{ flex: 1 }}
             />
           </div>
-          {filtered.length === 0 ? (
-            <p className="muted" data-testid="products-empty">{tt('products.empty')}</p>
+          {loading ? (
+            <p className="muted" data-testid="products-loading">
+              {tt('products.loading')}
+            </p>
+          ) : error ? (
+            <p style={{ color: 'crimson' }} data-testid="products-error">
+              {error}
+            </p>
+          ) : showEmpty ? (
+            <p className="muted" data-testid="products-empty">
+              {tt('products.empty')}
+            </p>
           ) : (
             <div className="products-grid" data-testid="products-grid">
-              {filtered.map((p) => (
+              {products.map((p) => (
                 <article key={p.id} className="card product-card" data-testid={`product-card-${p.id}`}>
                   <img src={p.image} alt={p.name} loading="lazy" />
                   <div className="body">
@@ -109,7 +172,7 @@ export const Products = () => {
                     <div className="actions">
                       <button
                         className="btn"
-                        onClick={() => addToCart(p.id)}
+                        onClick={() => void addToCart(p.id)}
                         data-testid={`product-add-${p.id}`}
                       >
                         {tt('products.add')}
