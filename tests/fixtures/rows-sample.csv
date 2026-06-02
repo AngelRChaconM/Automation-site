@@ -1,0 +1,3 @@
+id,name,email,age,country,active,salary
+101,Ivan Petrov,ivan@example.com,33,Russia,true,71000
+102,Julia Garcia,julia@example.com,30,Mexico,false,64000
