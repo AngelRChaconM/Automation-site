@@ -8,6 +8,7 @@ import { Cart } from './pages/ecommerce/Cart';
 import { SignupLogin } from './pages/ecommerce/SignupLogin';
 import { Checkout } from './pages/ecommerce/Checkout';
 import { Contact } from './pages/ecommerce/Contact';
+import { Orders } from './pages/ecommerce/Orders';
 import { BlogList } from './pages/blog/BlogList';
 import { BlogPost } from './pages/blog/BlogPost';
 import { HandsOnTablePage } from './pages/handsontable/HandsOnTablePage';
@@ -30,6 +31,7 @@ export const App = () => (
           <Route path="/ecommerce/cart" element={<Cart />} />
           <Route path="/ecommerce/login" element={<SignupLogin />} />
           <Route path="/ecommerce/checkout" element={<Checkout />} />
+          <Route path="/ecommerce/orders" element={<Orders />} />
           <Route path="/ecommerce/contact" element={<Contact />} />
 
           <Route path="/blog" element={<BlogList />} />

@@ -1,6 +1,6 @@
 # Automation Practice Site
 
-A self-contained site to practice end-to-end test automation, similar to [automationexercise.com](https://automationexercise.com/) but framework-agnostic. Built with Vite + React + TypeScript. No backend, no database, everything runs client-side.
+A self-contained site to practice end-to-end test automation, similar to [automationexercise.com](https://automationexercise.com/) but framework-agnostic. Built with Vite + React + TypeScript. No real database — UI settings use `localStorage`; eCommerce auth/cart/checkout use an in-memory mock REST API on the dev server.
 
 ## Stack
 
@@ -53,12 +53,12 @@ Sample assets: [`public/samples/`](public/samples/).
 | Theme       | `light`, `dark`         | Switches `data-theme` on `<html>` and `<body>`                    |
 | Language    | `en` (default), `es`    | Single UI language at a time; toggle via header **EN** / **ES** or Settings |
 | Currency    | `USD` (default), `EUR`, `MXN` | Reformats all prices using `Intl.NumberFormat` + fixed conversion rate |
-| Auth        | `anon`, `user`, `admin` | Simulates role in Settings (for tests). Real login is on `/ecommerce/login` and is required for checkout. Session persists in `localStorage` across pages. |
-| Cart / login in header | — | Shown only on `/ecommerce/*` routes. Cart contents persist when you leave and return to the store. |
-| Data        | `populated`, `empty`    | Products / posts / table rows are present or empty                |
+| Auth        | `anon`, `user`, `admin` | Simulates role in Settings (calls login API). Real login is on `/ecommerce/login` and is required for checkout. Session token in `localStorage`. |
+| Cart / login in header | — | Shown only on `/ecommerce/*` routes. Cart is stored on the mock API (guest session or user token). |
+| Data        | `populated`, `empty`    | Products / posts / table rows are present or empty (stored via `PATCH /api/settings`) |
 | Difficulty  | `stable`, `flaky`       | Adds random delays and dynamic test ids in the Flaky page         |
 
-All settings are persisted in `localStorage` and exposed as `data-*` attributes on `<body>`:
+All settings are persisted via **`/api/settings`** (per browser session) and exposed as `data-*` attributes on `<body>`:
 
 ```html
 <body data-theme="dark" data-lang="en" data-currency="USD" data-auth="user" data-difficulty="stable" data-mode="populated">
@@ -77,32 +77,69 @@ Every interactive element exposes a `data-testid` with the convention `<section>
 <a data-testid="cart-checkout-btn">Proceed to Checkout</a>
 ```
 
+## REST API (mock backend)
+
+eCommerce and blog content use a **mock REST API** on the same dev server (`http://localhost:3000/api/*`). State lives in memory and resets when the server restarts. The UI calls these endpoints via `fetch`; you can also hit them directly for API testing (Postman, Playwright `request`, etc.).
+
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| `POST` | `/api/auth/login` | Session | `{ email, password }` → `{ token, email, role, items }` |
+| `POST` | `/api/auth/signup` | Session | `{ name, email, password }` → `{ token, email, role, items }` |
+| `POST` | `/api/auth/logout` | Bearer | Invalidates token |
+| `GET` | `/api/auth/me` | Bearer | Current user `{ email, role }` |
+| `GET` | `/api/cart` | Bearer or `X-Session-Id` | `{ items: [{ productId, qty }] }` |
+| `POST` | `/api/cart/items` | Bearer or `X-Session-Id` | `{ productId, qty }` → updated cart |
+| `DELETE` | `/api/cart/items/:id` | Bearer or `X-Session-Id` | Remove line item |
+| `DELETE` | `/api/cart` | Bearer or `X-Session-Id` | Clear cart |
+| `GET` | `/api/orders` | Bearer (required) | Order history for logged-in user |
+| `POST` | `/api/orders` | Bearer (required) | `{ address, cardName, cardNumber }` → `{ orderId }` |
+| `GET` | `/api/products` | — | Catalog; query `?search=&category=&brand=` |
+| `GET` | `/api/products/:id` | — | Single product |
+| `GET` | `/api/posts` | — | Blog post list (summaries) |
+| `GET` | `/api/posts/:id` | — | Post detail with comments |
+| `POST` | `/api/posts/:id/comments` | — | `{ author, text }` → `{ comments }` |
+| `POST` | `/api/contact` | Session | `{ name, email, subject, message }` |
+| `GET` | `/api/settings` | Session | UI prefs `{ theme, lang, currency, difficulty, dataMode }` |
+| `PATCH` | `/api/settings` | Session | Partial update of UI prefs |
+| `GET` | `/api/table-rows` | Session | Grid rows; query `?search=` |
+| `DELETE` | `/api/table-rows` | Session | Clear all rows |
+| `POST` | `/api/table-rows/bulk` | Session | Append `{ rows: [...] }` |
+| `GET` | `/api/files` | Session | Uploaded file metadata list |
+| `POST` | `/api/files` | Session | `{ name, size, type, lastModified, preview }` |
+| `POST` | `/api/dev/reset` | Session | Clears mock state for current session tenant |
+
+**Guest cart:** send header `X-Session-Id: <uuid>` on cart routes. The browser stores one automatically. On login, the guest cart merges into the user cart.
+
+**Login rules:** email must contain `@`, password min 4 chars. Email containing `admin` → role `admin`.
+
+See [`tests/playwright/api.spec.ts`](tests/playwright/api.spec.ts) for API-only examples.
+
 ## Programmatic API: `window.__app`
 
-The site exposes a global helper so tests can force state without going through the UI:
+The site exposes a global helper so tests can force UI prefs or call through to the REST API:
 
 ```js
-window.__app.setTheme('dark');
-window.__app.setLang('en');
-window.__app.setCurrency('EUR'); // 'USD' | 'EUR' | 'MXN'
-window.__app.setAuth('admin');
-window.__app.setDataMode('empty');
-window.__app.setDifficulty('flaky');
-window.__app.addToCart(1, 2);
-window.__app.reset(); // back to defaults
+await window.__app.setTheme('dark');
+await window.__app.setLang('en');
+await window.__app.setCurrency('EUR'); // 'USD' | 'EUR' | 'MXN'
+await window.__app.setAuth('admin'); // logs in via API (password: "password")
+await window.__app.setDataMode('empty');
+await window.__app.setDifficulty('flaky');
+await window.__app.addToCart(1, 2);
+await window.__app.reset(); // resets API + UI prefs
 ```
 
 Use it from any framework:
 
 ```js
 // Playwright
-await page.evaluate(() => window.__app.setAuth('admin'));
+await page.evaluate(async () => { await window.__app.setAuth('admin'); });
 
 // Cypress
-cy.window().then((w) => w.__app.setAuth('admin'));
+cy.window().then(async (w) => { await w.__app.setAuth('admin'); });
 
 // Selenium (JS executor)
-driver.executeScript("window.__app.setAuth('admin')");
+driver.executeScript("window.__app.setAuth('admin')"); // returns a Promise
 ```
 
 ## Running tests
@@ -165,10 +202,11 @@ Start the site (`npm start`), then point your tool at `http://localhost:3000`. U
 src/
   main.tsx, App.tsx, index.css
   context/AppContext.tsx
+  api/client.ts
   layout/{Layout,HamburgerMenu,SettingsPanel}.tsx
   pages/
     Home.tsx
-    ecommerce/{Products,ProductDetail,Cart,SignupLogin,Checkout,Contact}.tsx
+    ecommerce/{Products,ProductDetail,Cart,SignupLogin,Checkout,Orders,Contact}.tsx
     blog/{BlogList,BlogPost}.tsx
     handsontable/HandsOnTablePage.tsx
     playground/{Alerts,Iframes,ShadowDom,Flaky,Files,PlaygroundNav}.tsx
@@ -177,7 +215,9 @@ src/
   i18n/index.ts
 tests/
   playwright/
-    {ecommerce,blog,handsontable,playground}.spec.ts
+    {ecommerce,blog,handsontable,playground,api}.spec.ts
+server/
+  mockApi.ts
 playwright.config.ts
 vite.config.ts
 tsconfig.json

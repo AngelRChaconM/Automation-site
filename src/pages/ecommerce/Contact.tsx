@@ -1,16 +1,22 @@
 import { useState } from 'react';
-import { useApp } from '../../context/AppContext';
+import { ApiError, apiSubmitContact } from '../../api/client';
 import { useT } from '../../i18n/useT';
 
 export const Contact = () => {
-  const { state } = useApp();
   const tt = useT();
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
+    setError(null);
+    try {
+      await apiSubmitContact(form);
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : tt('contact.error'));
+    }
   };
 
   return (
@@ -54,6 +60,11 @@ export const Contact = () => {
             required
             data-testid="contact-message"
           />
+          {error && (
+            <p style={{ color: 'crimson' }} data-testid="contact-error">
+              {error}
+            </p>
+          )}
           <button type="submit" className="btn" data-testid="contact-submit">
             {tt('contact.submit')}
           </button>

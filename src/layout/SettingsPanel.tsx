@@ -56,7 +56,7 @@ export const SettingsPanel = ({ open, onClose }: Props) => {
               <button
                 key={o.id}
                 aria-pressed={state.theme === o.id}
-                onClick={() => setTheme(o.id)}
+                onClick={() => void setTheme(o.id)}
                 data-testid={o.testid}
               >
                 {o.label}
@@ -69,7 +69,7 @@ export const SettingsPanel = ({ open, onClose }: Props) => {
               <button
                 key={o.id}
                 aria-pressed={state.lang === o.id}
-                onClick={() => setLang(o.id)}
+                onClick={() => void setLang(o.id)}
                 data-testid={o.testid}
               >
                 {o.label}
@@ -82,7 +82,7 @@ export const SettingsPanel = ({ open, onClose }: Props) => {
               <button
                 key={o.id}
                 aria-pressed={state.currency === o.id}
-                onClick={() => setCurrency(o.id)}
+                onClick={() => void setCurrency(o.id)}
                 data-testid={o.testid}
               >
                 {o.label}
@@ -95,7 +95,7 @@ export const SettingsPanel = ({ open, onClose }: Props) => {
               <button
                 key={o.id}
                 aria-pressed={state.auth === o.id}
-                onClick={() => setAuth(o.id, o.id === 'anon' ? null : `${o.id}@example.com`)}
+                onClick={() => void setAuth(o.id, o.id === 'anon' ? null : `${o.id}@example.com`)}
                 data-testid={o.testid}
               >
                 {o.label}
@@ -108,7 +108,7 @@ export const SettingsPanel = ({ open, onClose }: Props) => {
               <button
                 key={o.id}
                 aria-pressed={state.dataMode === o.id}
-                onClick={() => setDataMode(o.id)}
+                onClick={() => void setDataMode(o.id)}
                 data-testid={o.testid}
               >
                 {o.label}
@@ -121,7 +121,7 @@ export const SettingsPanel = ({ open, onClose }: Props) => {
               <button
                 key={o.id}
                 aria-pressed={state.difficulty === o.id}
-                onClick={() => setDifficulty(o.id)}
+                onClick={() => void setDifficulty(o.id)}
                 data-testid={o.testid}
               >
                 {o.label}
@@ -129,7 +129,7 @@ export const SettingsPanel = ({ open, onClose }: Props) => {
             ))}
           </Row>
 
-          <button className="btn secondary" onClick={reset} data-testid="settings-reset">
+          <button className="btn secondary" onClick={() => void reset()} data-testid="settings-reset">
             {tt('settings.reset')}
           </button>
         </div>

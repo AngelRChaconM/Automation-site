@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ApiError } from '../../api/client';
 import { useApp } from '../../context/AppContext';
 import { useT } from '../../i18n/useT';
 
 export const SignupLogin = () => {
-  const { state, setAuth } = useApp();
+  const { state, login, signup, setAuth } = useApp();
   const tt = useT();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -16,32 +17,37 @@ export const SignupLogin = () => {
 
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
+  const [signupPass, setSignupPass] = useState('');
+  const [signupError, setSignupError] = useState<string | null>(null);
   const [signupOk, setSignupOk] = useState(false);
 
   const isLoggedIn = state.auth !== 'anon';
 
-  const submitLogin = (e: React.FormEvent) => {
+  const submitLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!loginEmail.includes('@') || loginPass.length < 4) {
-      setLoginError(tt('login.errorInvalid'));
-      return;
-    }
     setLoginError(null);
-    setAuth(loginEmail.includes('admin') ? 'admin' : 'user', loginEmail);
-    navigate(redirectTo);
-  };
-
-  const submitSignup = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (signupName && signupEmail.includes('@')) {
-      setSignupOk(true);
-      setAuth('user', signupEmail);
+    try {
+      await login(loginEmail, loginPass);
       navigate(redirectTo);
+    } catch (err) {
+      setLoginError(err instanceof ApiError ? err.message : tt('login.errorInvalid'));
     }
   };
 
-  const logout = () => {
-    setAuth('anon');
+  const submitSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignupError(null);
+    try {
+      await signup(signupName, signupEmail, signupPass);
+      setSignupOk(true);
+      navigate(redirectTo);
+    } catch (err) {
+      setSignupError(err instanceof ApiError ? err.message : tt('login.errorInvalid'));
+    }
+  };
+
+  const logout = async () => {
+    await setAuth('anon');
     setLoginEmail('');
     setLoginPass('');
     setSignupOk(false);
@@ -114,6 +120,19 @@ export const SignupLogin = () => {
                 data-testid="signup-email"
                 required
               />
+              <input
+                type="password"
+                placeholder={tt('signup.password')}
+                value={signupPass}
+                onChange={(e) => setSignupPass(e.target.value)}
+                data-testid="signup-password"
+                required
+              />
+              {signupError && (
+                <p style={{ color: 'crimson' }} data-testid="signup-error">
+                  {signupError}
+                </p>
+              )}
               <button type="submit" className="btn" data-testid="signup-submit">
                 {tt('signup.submit')}
               </button>

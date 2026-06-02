@@ -1,16 +1,17 @@
 import { Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { PRODUCTS } from '../../data/products';
+import { useProducts } from '../../hooks/useProducts';
 import { useT } from '../../i18n/useT';
 import { formatPrice } from '../../i18n/currency';
 
 export const Cart = () => {
   const { state, removeFromCart, clearCart } = useApp();
+  const { products, loading } = useProducts();
   const tt = useT();
 
   const rows = state.cart
     .map((i) => {
-      const p = PRODUCTS.find((x) => x.id === i.productId);
+      const p = products.find((x) => x.id === i.productId);
       return p ? { ...p, qty: i.qty, total: p.price * i.qty } : null;
     })
     .filter((x): x is NonNullable<typeof x> => x !== null);
@@ -20,7 +21,11 @@ export const Cart = () => {
   return (
     <section data-testid="page-cart">
       <h1>{tt('cart.title')}</h1>
-      {rows.length === 0 ? (
+      {loading ? (
+        <p className="muted" data-testid="cart-loading">
+          {tt('products.loading')}
+        </p>
+      ) : rows.length === 0 ? (
         <p data-testid="cart-empty">{tt('cart.empty')}</p>
       ) : (
         <>
@@ -44,7 +49,7 @@ export const Cart = () => {
                   <td>
                     <button
                       className="btn secondary"
-                      onClick={() => removeFromCart(r.id)}
+                      onClick={() => void removeFromCart(r.id)}
                       data-testid={`cart-remove-${r.id}`}
                     >
                       x
@@ -66,7 +71,7 @@ export const Cart = () => {
             </tfoot>
           </table>
           <div className="flex-row" style={{ marginTop: 16 }}>
-            <button className="btn secondary" onClick={clearCart} data-testid="cart-clear">
+            <button className="btn secondary" onClick={() => void clearCart()} data-testid="cart-clear">
               {tt('cart.clear')}
             </button>
             <Link to="/ecommerce/checkout" className="btn" data-testid="cart-checkout-btn">

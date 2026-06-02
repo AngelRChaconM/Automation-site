@@ -1,7 +1,8 @@
 import { Link, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ApiError, apiGetProduct } from '../../api/client';
 import { useApp } from '../../context/AppContext';
-import { PRODUCTS } from '../../data/products';
+import type { Product } from '../../data/products';
 import { useT } from '../../i18n/useT';
 import { formatPrice } from '../../i18n/currency';
 
@@ -10,9 +11,57 @@ export const ProductDetail = () => {
   const { state, addToCart } = useApp();
   const tt = useT();
   const [qty, setQty] = useState(1);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  const product = PRODUCTS.find((p) => p.id === Number(id));
-  if (!product) {
+  useEffect(() => {
+    const productId = Number(id);
+    if (!productId) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
+
+    if (state.dataMode === 'empty') {
+      setProduct(null);
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setNotFound(false);
+
+    apiGetProduct(productId)
+      .then((res) => {
+        if (!cancelled) setProduct(res.product);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setProduct(null);
+          setNotFound(err instanceof ApiError && err.status === 404);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, state.dataMode]);
+
+  if (loading) {
+    return (
+      <section data-testid="page-product-loading">
+        <p className="muted">{tt('products.loading')}</p>
+      </section>
+    );
+  }
+
+  if (notFound || !product) {
     return (
       <section data-testid="page-product-not-found">
         <h1>Product not found</h1>
@@ -27,7 +76,9 @@ export const ProductDetail = () => {
         <img src={product.image} alt={product.name} style={{ width: '100%', borderRadius: 6 }} />
         <div>
           <h1 data-testid="product-detail-name">{product.name}</h1>
-          <p className="muted">Category: {product.category} | Brand: {product.brand}</p>
+          <p className="muted">
+            Category: {product.category} | Brand: {product.brand}
+          </p>
           <p className="price" data-testid="product-detail-price" style={{ fontSize: 22 }}>
             {formatPrice(product.price, state.currency)}
           </p>
@@ -45,7 +96,7 @@ export const ProductDetail = () => {
             />
             <button
               className="btn"
-              onClick={() => addToCart(product.id, qty)}
+              onClick={() => void addToCart(product.id, qty)}
               data-testid="product-detail-add"
             >
               {tt('products.add')}

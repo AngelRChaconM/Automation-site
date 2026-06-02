@@ -13,6 +13,7 @@ const EN: Dict = {
   'nav.cart': 'Cart',
   'nav.login': 'Login / Signup',
   'nav.account': 'My account',
+  'nav.orders': 'My orders',
   'nav.contact': 'Contact',
   'nav.alerts': 'Alerts',
   'nav.iframes': 'Iframes',
@@ -72,6 +73,12 @@ const EN: Dict = {
   'checkout.cardName': 'Cardholder name',
   'checkout.cardNumber': 'Card number',
   'checkout.placeOrder': 'Place Order',
+
+  'orders.title': 'My orders',
+  'orders.empty': 'No orders yet.',
+  'orders.loginRequired': 'Please log in to view your orders.',
+  'orders.total': 'Total',
+  'orders.viewOrders': 'View my orders',
   'checkout.loginRequired': 'You must be logged in to checkout.',
   'checkout.goLogin': 'Go to login',
   'checkout.success.title': 'Order Placed!',
@@ -82,6 +89,7 @@ const EN: Dict = {
   'products.add': 'Add to cart',
   'products.view': 'View product',
   'products.empty': 'No products to show.',
+  'products.loading': 'Loading products…',
 
   'login.title': 'Login to your account',
   'login.email': 'Email',
@@ -93,6 +101,7 @@ const EN: Dict = {
   'login.signupSuccess': 'Account created!',
   'signup.title': 'New user signup',
   'signup.name': 'Name',
+  'signup.password': 'Password',
   'signup.submit': 'Signup',
 
   'contact.title': 'Contact us',
@@ -102,9 +111,11 @@ const EN: Dict = {
   'contact.message': 'Message',
   'contact.submit': 'Submit',
   'contact.sent': 'Message sent successfully.',
+  'contact.error': 'Could not send message.',
 
   'blog.title': 'Blog',
   'blog.empty': 'No posts to show.',
+  'blog.loading': 'Loading posts…',
   'blog.by': 'By',
   'blog.postNotFound': 'Post not found',
   'blog.back': 'Back to blog',
@@ -112,6 +123,7 @@ const EN: Dict = {
   'blog.commentAuthor': 'Your name',
   'blog.commentText': 'Your comment',
   'blog.commentSubmit': 'Post comment',
+  'blog.commentError': 'Could not post comment.',
   'blog.commentPlaceholder': 'Write a comment...',
 
   'hot.title': 'HandsOnTable',
@@ -185,6 +197,7 @@ const ES: Dict = {
   'nav.cart': 'Carrito',
   'nav.login': 'Login / Registro',
   'nav.account': 'Mi cuenta',
+  'nav.orders': 'Mis pedidos',
   'nav.contact': 'Contacto',
   'nav.alerts': 'Alertas',
   'nav.iframes': 'Iframes',
@@ -244,6 +257,12 @@ const ES: Dict = {
   'checkout.cardName': 'Nombre en la tarjeta',
   'checkout.cardNumber': 'Numero de tarjeta',
   'checkout.placeOrder': 'Confirmar pedido',
+
+  'orders.title': 'Mis pedidos',
+  'orders.empty': 'Aún no hay pedidos.',
+  'orders.loginRequired': 'Inicia sesión para ver tus pedidos.',
+  'orders.total': 'Total',
+  'orders.viewOrders': 'Ver mis pedidos',
   'checkout.loginRequired': 'Debes iniciar sesion para hacer checkout.',
   'checkout.goLogin': 'Ir a login',
   'checkout.success.title': 'Pedido realizado!',
@@ -254,6 +273,7 @@ const ES: Dict = {
   'products.add': 'Agregar al carrito',
   'products.view': 'Ver producto',
   'products.empty': 'No hay productos para mostrar.',
+  'products.loading': 'Cargando productos…',
 
   'login.title': 'Inicia sesion en tu cuenta',
   'login.email': 'Email',
@@ -265,6 +285,7 @@ const ES: Dict = {
   'login.signupSuccess': 'Cuenta creada!',
   'signup.title': 'Registro de usuario',
   'signup.name': 'Nombre',
+  'signup.password': 'Contraseña',
   'signup.submit': 'Registrarse',
 
   'contact.title': 'Contactanos',
@@ -274,9 +295,11 @@ const ES: Dict = {
   'contact.message': 'Mensaje',
   'contact.submit': 'Enviar',
   'contact.sent': 'Mensaje enviado correctamente.',
+  'contact.error': 'No se pudo enviar el mensaje.',
 
   'blog.title': 'Blog',
   'blog.empty': 'No hay posts para mostrar.',
+  'blog.loading': 'Cargando posts…',
   'blog.by': 'Por',
   'blog.postNotFound': 'Post no encontrado',
   'blog.back': 'Volver al blog',
@@ -284,6 +307,7 @@ const ES: Dict = {
   'blog.commentAuthor': 'Tu nombre',
   'blog.commentText': 'Tu comentario',
   'blog.commentSubmit': 'Publicar comentario',
+  'blog.commentError': 'No se pudo publicar el comentario.',
   'blog.commentPlaceholder': 'Escribe un comentario...',
 
   'hot.title': 'HandsOnTable',
