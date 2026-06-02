@@ -1,25 +1,21 @@
 {
   "name": "automation-site",
   "version": "1.0.0",
-  "description": "Practice site for test automation (Playwright, Cypress, WebdriverIO, Selenium, ...). Vite + React + TS.",
+  "description": "Framework-agnostic practice site for test automation. Vite + React + TS.",
   "type": "module",
   "scripts": {
     "start": "vite --port 3000 --host",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --port 3000 --host",
-    "test:pw": "playwright test",
-    "test:pw:ui": "playwright test --ui"
+    "preview": "vite preview --port 3000 --host"
   },
   "keywords": [
     "automation",
     "testing",
-    "playwright",
-    "cypress"
+    "e2e"
   ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.60.0",
     "@types/node": "^25.7.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",

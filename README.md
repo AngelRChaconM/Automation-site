@@ -7,7 +7,6 @@ A self-contained site to practice end-to-end test automation, similar to [automa
 - Vite + React 18 + TypeScript
 - React Router v6
 - Handsontable v17 (data grid)
-- Playwright (sample tests; the site itself does not depend on any test runner)
 
 ## Quick start
 
@@ -79,7 +78,7 @@ Every interactive element exposes a `data-testid` with the convention `<section>
 
 ## REST API (mock backend)
 
-eCommerce and blog content use a **mock REST API** on the same dev server (`http://localhost:3000/api/*`). State lives in memory and resets when the server restarts. The UI calls these endpoints via `fetch`; you can also hit them directly for API testing (Postman, Playwright `request`, etc.).
+eCommerce and blog content use a **mock REST API** on the same dev server (`http://localhost:3000/api/*`). State lives in memory and resets when the server restarts. The UI calls these endpoints via `fetch`; you can also call them with curl, Postman, or any HTTP client.
 
 | Method | Route | Auth | Description |
 |--------|-------|------|-------------|
@@ -112,7 +111,14 @@ eCommerce and blog content use a **mock REST API** on the same dev server (`http
 
 **Login rules:** email must contain `@`, password min 4 chars. Email containing `admin` → role `admin`.
 
-See [`tests/playwright/api.spec.ts`](tests/playwright/api.spec.ts) for API-only examples.
+**Session header:** most routes below `/api/products` and `/api/posts` require `X-Session-Id` (any string; the UI stores a UUID in `localStorage`). Example:
+
+```bash
+curl -X POST http://localhost:3000/api/dev/reset -H "X-Session-Id: my-session"
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" -H "X-Session-Id: my-session" \
+  -d '{"email":"user@example.com","password":"password"}'
+```
 
 ## Programmatic API: `window.__app`
 
@@ -129,31 +135,9 @@ await window.__app.addToCart(1, 2);
 await window.__app.reset(); // resets API + UI prefs
 ```
 
-Use it from any framework:
-
-```js
-// Playwright
-await page.evaluate(async () => { await window.__app.setAuth('admin'); });
-
-// Cypress
-cy.window().then(async (w) => { await w.__app.setAuth('admin'); });
-
-// Selenium (JS executor)
-driver.executeScript("window.__app.setAuth('admin')"); // returns a Promise
-```
+Call these helpers from your test runner’s browser context (e.g. `page.evaluate`, `cy.window()`, or a JS executor). All methods return Promises.
 
 ## Running tests
-
-### Playwright (included)
-
-```bash
-npm start            # in one terminal
-npm run test:pw      # in another
-# or just:
-npm run test:pw      # uses webServer: { reuseExistingServer: true }
-```
-
-Specs live in [`tests/playwright/`](tests/playwright/).
 
 ### Cypress
 
@@ -193,8 +177,6 @@ Start the site (`npm start`), then point your tool at `http://localhost:3000`. U
 | `npm start`         | Run dev server on port 3000           |
 | `npm run build`     | Type-check and build to `dist/`       |
 | `npm run preview`   | Serve the production build on 3000    |
-| `npm run test:pw`   | Run Playwright tests                  |
-| `npm run test:pw:ui`| Run Playwright tests in UI mode       |
 
 ## Project layout
 
@@ -213,12 +195,8 @@ src/
   public/samples/{sample.txt,sample.json,sample.pdf}
   data/{products,posts,tableRows}.ts
   i18n/index.ts
-tests/
-  playwright/
-    {ecommerce,blog,handsontable,playground,api}.spec.ts
 server/
   mockApi.ts
-playwright.config.ts
 vite.config.ts
 tsconfig.json
 index.html

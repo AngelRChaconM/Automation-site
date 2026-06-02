@@ -2,10 +2,7 @@ node_modules/
 dist/
 /.cursor/
 
-# Playwright
+# Local test output (not part of the site)
 /test-results/
 /playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
-/.playwright-mcp
+/.playwright-mcp/
