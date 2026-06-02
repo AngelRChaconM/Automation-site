@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Blue Top">
+  <rect width="400" height="300" fill="#dce8f5"/>
+  <path d="M118 118 L158 92 L200 108 L242 92 L282 118 L268 250 L132 250 Z" fill="#3b82f6"/>
+  <path d="M118 118 L158 92 L175 108 L200 88 L225 108 L242 92 L282 118 L268 135 L132 135 Z" fill="#2563eb"/>
+  <ellipse cx="200" cy="100" rx="26" ry="18" fill="#dce8f5"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Frozen Tops For Kids">
+  <rect width="400" height="300" fill="#cffafe"/>
+  <path d="M135 125 L172 100 L200 116 L228 100 L265 125 L254 238 L146 238 Z" fill="#22d3ee"/>
+  <path d="M135 125 L172 100 L188 116 L200 98 L212 116 L228 100 L265 125 L254 142 L146 142 Z" fill="#06b6d4"/>
+  <ellipse cx="200" cy="108" rx="22" ry="15" fill="#cffafe"/>
+  <circle cx="182" cy="175" r="7" fill="#ffffff" opacity=".85"/>
+  <circle cx="218" cy="188" r="5" fill="#ffffff" opacity=".85"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Premium Polo T-Shirt">
+  <rect width="400" height="300" fill="#dbeafe"/>
+  <path d="M118 128 L158 100 L200 116 L242 100 L282 128 L270 246 L130 246 Z" fill="#1e40af"/>
+  <path d="M118 128 L158 100 L175 116 L200 96 L225 116 L242 100 L282 128 L270 148 L130 148 Z" fill="#1e3a5f"/>
+  <ellipse cx="200" cy="108" rx="24" ry="16" fill="#dbeafe"/>
+  <path d="M152 128 h96 v22 h-96 z" fill="#ffffff"/>
+  <path d="M176 128 v22 M200 128 v22 M224 128 v22" stroke="#1e40af" stroke-width="2"/>
+  <circle cx="200" cy="139" r="3" fill="#1e40af"/>
+</svg>

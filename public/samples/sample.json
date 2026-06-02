@@ -1,0 +1,5 @@
+{
+  "app": "automation-practice-site",
+  "version": 1,
+  "assertKey": "EXPECTED_JSON_KEY"
+}

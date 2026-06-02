@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Sleeveless Dress">
+  <rect width="400" height="300" fill="#f5e6eb"/>
+  <path d="M168 118 L200 98 L232 118 L248 255 L152 255 Z" fill="#db2777"/>
+  <path d="M152 118 L168 118 L185 106 L200 90 L215 106 L232 118 L248 118 L248 138 L152 138 Z" fill="#be185d"/>
+  <ellipse cx="200" cy="102" rx="24" ry="16" fill="#f5e6eb"/>
+  <rect x="140" y="118" width="14" height="75" fill="#f5e6eb"/>
+  <rect x="246" y="118" width="14" height="75" fill="#f5e6eb"/>
+</svg>

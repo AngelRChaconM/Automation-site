@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Men Tshirt">
+  <rect width="400" height="300" fill="#e8edf2"/>
+  <path d="M115 120 L155 94 L200 110 L245 94 L285 120 L272 248 L128 248 Z" fill="#4b5563"/>
+  <path d="M115 120 L155 94 L172 110 L200 90 L228 110 L245 94 L285 120 L272 138 L128 138 Z" fill="#374151"/>
+  <ellipse cx="200" cy="102" rx="28" ry="19" fill="#e8edf2"/>
+</svg>

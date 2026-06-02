@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Summer White Top">
+  <rect width="400" height="300" fill="#fef9c3"/>
+  <path d="M120 122 L160 96 L200 112 L240 96 L280 122 L268 246 L132 246 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M120 122 L160 96 L177 112 L200 92 L223 112 L240 96 L280 122 L268 140 L132 140 Z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <ellipse cx="200" cy="104" rx="27" ry="18" fill="#fef9c3"/>
+</svg>

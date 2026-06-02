@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Panda Shirt">
+  <rect width="400" height="300" fill="#fef3c7"/>
+  <path d="M138 126 L175 102 L200 118 L225 102 L262 126 L252 235 L148 235 Z" fill="#fb7185"/>
+  <path d="M138 126 L175 102 L190 118 L200 100 L210 118 L225 102 L262 126 L252 143 L148 143 Z" fill="#f472b6"/>
+  <ellipse cx="200" cy="110" rx="21" ry="14" fill="#fef3c7"/>
+  <circle cx="200" cy="178" r="30" fill="#ffffff"/>
+  <circle cx="186" cy="170" r="9" fill="#111827"/>
+  <circle cx="214" cy="170" r="9" fill="#111827"/>
+  <ellipse cx="200" cy="186" rx="11" ry="8" fill="#111827"/>
+  <circle cx="200" cy="182" r="4" fill="#f472b6"/>
+</svg>

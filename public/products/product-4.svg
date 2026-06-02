@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Stylish Dress">
+  <rect width="400" height="300" fill="#f3e8ff"/>
+  <path d="M145 125 Q200 95 255 125 L268 258 L132 258 Z" fill="#8b5cf6"/>
+  <path d="M132 125 L145 125 Q200 108 255 125 L268 125 L268 142 L132 142 Z" fill="#7c3aed"/>
+  <ellipse cx="200" cy="112" rx="32" ry="12" fill="#f3e8ff"/>
+  <path d="M155 155 h90 v35 h-90 z" fill="#a78bfa" opacity=".35"/>
+</svg>

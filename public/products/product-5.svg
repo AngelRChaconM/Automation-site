@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Winter Top">
+  <rect width="400" height="300" fill="#e2e8f0"/>
+  <path d="M125 125 L165 98 L200 115 L235 98 L275 125 L262 245 L138 245 Z" fill="#64748b"/>
+  <ellipse cx="200" cy="108" rx="22" ry="14" fill="#e2e8f0"/>
+  <ellipse cx="200" cy="98" rx="30" ry="22" fill="none" stroke="#475569" stroke-width="14"/>
+  <path d="M155 145 h90 M155 168 h90 M155 191 h90" stroke="#94a3b8" stroke-width="3"/>
+</svg>
